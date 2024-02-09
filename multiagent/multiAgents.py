@@ -85,18 +85,14 @@ class ReflexAgent(Agent):
         "*** YOUR CODE HERE ***"
         score = 0  # update score according to conditions of environment
         for gstate in newGhostStates:
-            # ghostX, ghostY = gstate.getPosition()
             distFromGhost = manhattanDistance(
                 newPos, gstate.getPosition())  # distance from ghost
 
             if distFromGhost < 3:
                 score -= 30
-
-            distFromFood = []
-            for food in newFood:
-                distFromFood.append(manhattanDistance(newPos, food))
-            if distFromFood:
-                minDist = min(distFromFood)
+            if newFood:
+                minDist = min([manhattanDistance(newPos, food)
+                              for food in newFood])
             else:
                 minDist = 0
             score -= (minDist + 20*len(newFood))
