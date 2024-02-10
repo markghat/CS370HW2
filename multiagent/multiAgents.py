@@ -206,7 +206,46 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def ABmax_val(state, depth, alpha, beta):
+            if state.isWin() or state.isLose() or depth == 0:
+                return self.evaluationFunction(state)
+            v = float('-inf')
+            for action in state.getLegalActions(0):
+                v = max(v, ABmin_val(state.generateSuccessor(
+                    0, action), depth, 1, alpha, beta))
+                if v > beta:  # best guaranteed option available to min
+                    return v  # no longer exploring branch
+                alpha = max(alpha, v)
+            return v
+
+        def ABmin_val(state, depth, agentIndex, alpha, beta):
+            if state.isWin() or state.isLose() or depth == 0:
+                return self.evaluationFunction(state)
+            v = float('inf')
+            num_agents = state.getNumAgents()
+            for action in state.getLegalActions(agentIndex):
+                if agentIndex == num_agents - 1:
+                    v = min(v, ABmax_val(state.generateSuccessor(
+                        agentIndex, action), depth - 1, alpha, beta))
+                else:
+                    v = min(v, ABmin_val(state.generateSuccessor(
+                        agentIndex, action), depth, agentIndex + 1, alpha, beta))
+                if v < alpha:  # best guaranteed option available to max
+                    return v  # no longer exploring branch
+                beta = min(beta, v)
+            return v
+
+        alpha = maximum = float('-inf')
+        beta = float('inf')
+        best_action = None
+        for action in gameState.getLegalActions(0):
+            v = ABmin_val(gameState.generateSuccessor(
+                0, action), self.depth, 1, alpha, beta)
+            if v > maximum:
+                maximum = v
+                best_action = action
+            alpha = max(alpha, v)
+        return best_action if best_action else None
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
