@@ -75,9 +75,6 @@ class ReflexAgent(Agent):
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood().asList()  # make into a list
         newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [
-            ghostState.scaredTimer for ghostState in newGhostStates]
-
         # print("New Position: " + str(newPos))
         # print("New Food: " + str(newFood))
         # print("New Ghost States: " + str(newGhostStates))
@@ -299,7 +296,26 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    x, y = position = currentGameState.getPacmanPosition()
+    ghostStates = currentGameState.getGhostStates()
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+    currentFood = currentGameState.getFood().asList()
+
+    score = 0
+
+    for gstate in ghostStates:
+        distFromGhost = manhattanDistance(
+            position, gstate.getPosition())  # distance from ghost
+
+        if distFromGhost < 3:
+            score -= 20
+        if currentFood:
+            minDist = min([manhattanDistance(position, food)
+                          for food in currentFood])
+        else:
+            minDist = 0
+        score -= (minDist+1 + 5000*len(currentFood))
+    return score
 
 
 # Abbreviation
