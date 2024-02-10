@@ -160,33 +160,40 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        def max_value(state, depth):
-            if state.isWin() or state.isLose() or depth == 0:  # if depth = self.depth
+        def max_val(state, depth):
+            if state.isWin() or state.isLose() or depth == 0:
                 return self.evaluationFunction(state)
             v = float('-inf')
+            # Posibble Pac Actions
             for action in state.getLegalActions(0):
-                v = max(v, min_value(
-                    state.generateSuccessor(0, action), depth - 1))
+                v = max(v, min_val(state.generateSuccessor(0, action), depth, 1))
             return v
 
-        def min_value(state, depth):
+        def min_val(state, depth, agentIndex):
             if state.isWin() or state.isLose() or depth == 0:
                 return self.evaluationFunction(state)
             v = float('inf')
-            for agent in range(1, gameState.getNumAgents()):
-                for action in state.getLegalActions(agent):
-                    v = min(v, max_value(
-                        state.generateSuccessor(agent, action), depth - 1))
+            num_agents = state.getNumAgents()
+            for action in state.getLegalActions(agentIndex):
+                # Last Ghost
+                if agentIndex == num_agents - 1:
+                    v = min(v, max_val(state.generateSuccessor(
+                        agentIndex, action), depth - 1))
+                # Any Other Ghosts
+                else:
+                    v = min(v, min_val(state.generateSuccessor(
+                        agentIndex, action), depth, agentIndex + 1))
             return v
 
-        max_val = float('-inf')
-        best_action = None
+        maximum = float('-inf')
         for action in gameState.getLegalActions(0):
-            v = min_value(gameState.generateSuccessor(0, action), self.depth)
-            if v > max_val:
-                max_val = v
+            # Pac's Move
+            v = min_val(gameState.generateSuccessor(0, action),
+                        self.depth, 1)
+            if v > maximum:
+                maximum = v
                 best_action = action
-        return best_action
+        return best_action if best_action else None
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
