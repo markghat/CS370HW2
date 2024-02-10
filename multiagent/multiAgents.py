@@ -250,18 +250,45 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
-      Your expectimax agent (question 4)
+    Your expectimax agent (question 4)
     """
 
     def getAction(self, gameState):
-        """
-        Returns the expectimax action using self.depth and self.evaluationFunction
+        def max_val(state, depth):
+            if state.isWin() or state.isLose() or depth == 0:
+                return self.evaluationFunction(state)
+            v = float('-inf')
+            # Possible Pac Actions
+            for action in state.getLegalActions(0):
+                v = max(v, exp_val(state.generateSuccessor(0, action), depth, 1))
+            return v
 
-        All ghosts should be modeled as choosing uniformly at random from their
-        legal moves.
-        """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def exp_val(state, depth, agentIndex):
+            if state.isWin() or state.isLose() or depth == 0:
+                return self.evaluationFunction(state)
+            total_value = 0
+            num_actions = len(state.getLegalActions(agentIndex))
+            # Randomize
+            prob = 1.0 / num_actions
+            for action in state.getLegalActions(agentIndex):
+                if agentIndex == state.getNumAgents() - 1:  # Last ghost's turn
+                    # Pac's turn
+                    total_value += max_val(state.generateSuccessor(
+                        agentIndex, action), depth - 1) * prob
+                else:
+                    total_value += exp_val(state.generateSuccessor(
+                        agentIndex, action), depth, agentIndex + 1) * prob  # next ghost's turn
+            return total_value
+
+        maximum = float('-inf')
+        best_action = None
+        for action in gameState.getLegalActions(0):
+            # Pac's Move
+            v = exp_val(gameState.generateSuccessor(0, action), self.depth, 1)
+            if v > maximum:
+                maximum = v
+                best_action = action
+        return best_action if best_action else None
 
 
 def betterEvaluationFunction(currentGameState):
