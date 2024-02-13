@@ -293,7 +293,7 @@ def betterEvaluationFunction(currentGameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: This funtion evaluates the desirability of a gien game state for PacMan based on a score that takes into account the distance to ghosts, food, and PacMan's position. The first few lines create variables, similarly to how it is done in the Q1 evaluationFunction(). Then it calculates distances to food and ghosts mased on a Manhattan heursitic. This information is then used to calculate the min distances to food and ghosts, as well as teh total distance to food. This is used to update the score to be evaluated. In order to try and get a higher score, it also takes into account the remaining time that scared ghosts are scared for.
     """
     "*** YOUR CODE HERE ***"
     """x, y = position = currentGameState.getPacmanPosition()
@@ -316,10 +316,10 @@ def betterEvaluationFunction(currentGameState):
             minDist = 0
         score -= (minDist+1 + 5000*len(currentFood))
     return score"""
-    if currentGameState.isWin():
+    """if currentGameState.isWin():
         return float("inf")
     elif currentGameState.isLose():
-        return -float("inf")
+        return -float("inf")"""
 
     newPos = currentGameState.getPacmanPosition()
     newFood = currentGameState.getFood()
@@ -330,23 +330,30 @@ def betterEvaluationFunction(currentGameState):
     minFoodDistance = min(foodDistances) if foodDistances else 0
 
     ghostDistances = [manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates]
-    scaredGhosts, activeGhosts = [], []
-    for i, ghost in enumerate(newGhostStates):
-        if newScaredTimes[i] > 0:
-            scaredGhosts.append(ghostDistances[i])
-        else:
-            activeGhosts.append(ghostDistances[i])
+    #scaredGhosts, activeGhosts = [], []
+    #for i, ghost in enumerate(newGhostStates):
+    # if newScaredTimes[i] > 0:
+    #     scaredGhosts.append(ghostDistances[i])
+    # else:
+    #     activeGhosts.append(ghostDistances[i])
 
-    ghostScore = sum([(-2 / (ghostDist + 1)) for ghostDist in activeGhosts])
-    scaredGhostScore = sum([(2 / (ghostDist + 1)) for ghostDist in scaredGhosts])
+    #ghostScore = sum([(-2 / (ghostDist + 1)) for ghostDist in activeGhosts])
+    #scaredGhostScore = sum([(2 / (ghostDist + 1)) for ghostDist in scaredGhosts])
 
+    minGhostDistance = min(ghostDistances)
+
+    totalFoodDistance = sum(foodDistances)
     remainingFoodScore = -len(newFood.asList())
     remainingScaredTime = sum(newScaredTimes)
 
     score = currentGameState.getScore()
-    score += -1.5 * minFoodDistance
-    score += ghostScore
-    score += scaredGhostScore
+    ##score += -1.5 * minFoodDistance
+    if (totalFoodDistance):
+        score += minGhostDistance/totalFoodDistance
+    else:
+        score += 0
+    ##score += ghostScore
+    ##score += scaredGhostScore
     score += remainingFoodScore
     score += remainingScaredTime
 
